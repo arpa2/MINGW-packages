@@ -1,0 +1,33 @@
+--- gnutls-3.6.6/libdane/dane.c     2018-06-16 15:32:48.000000000 +0200
++++ gnutls-3.6.6/libdane/dane.c    2019-02-18 21:22:55.884646300 +0100
+@@ -30,3 +30,2 @@
+ #include <errno.h>
+-#include <arpa/inet.h>
+ #include <unbound.h>
+@@ -38,2 +37,3 @@
+
++#define UNBOUND_ROOT_KEY_FILE "root.key"
+ #define MAX_DATA_ENTRIES 100
+
+--- gnutls-3.6.6/libdane/dane-params.c      2017-04-19 21:49:27.000000000 +0200
++++ gnutls-3.6.6/libdane/dane-params.c     2019-02-18 21:14:01.808643000 +0100
+@@ -26,7 +26,6 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <errno.h>
+-#include <arpa/inet.h>
+ #include <unbound.h>
+ #include <gnutls/dane.h>
+ #include <gnutls/x509.h>
+
+--- gnutls-3.6.6/libdane/Makefile.am        2019-02-27 18:15:06.878981500 +0100
++++ gnutls-3.6.6/libdane/Makefile.am       2019-02-18 23:02:04.106306400 +0100
+@@ -60,7 +60,7 @@
+ if HAVE_LD_OUTPUT_DEF
+ libgnutls_dane_la_LDFLAGS += \
+ 	-Wl,--output-def,libgnutls-dane-$(DLL_VERSION).def
+-libgnutls_dane-$(DLL_VERSION).def: libgnutls-dane.la
++libgnutls-dane-$(DLL_VERSION).def: libgnutls-dane.la
+
+ defexecdir = $(bindir)
+ defexec_DATA = libgnutls-dane-$(DLL_VERSION).def
