@@ -5,8 +5,8 @@ source "$(dirname ${BASH_SOURCE[0]})"/../mingw-w64-PKGBUILD-common/kde-framework
 _realname=kate
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-kate"
-pkgver=18.08.1
-pkgrel=2
+pkgver=19.12.3
+pkgrel=1
 arch=('any')
 license=('GPL' 'LGPL' 'FDL')
 url="https://www.kde.org/applications/utilities/kate/"
@@ -22,8 +22,9 @@ depends=("${MINGW_PACKAGE_PREFIX}-knewstuff-qt5${_namesuff}"
          "${MINGW_PACKAGE_PREFIX}-hicolor-icon-theme")
 optdepends=("${MINGW_PACKAGE_PREFIX}-breeze-icons-qt5${_namesuff}: application icon theme"
             "${MINGW_PACKAGE_PREFIX}-kinit-qt5${_namesuff}: file system browser plugin")
-source=("https://download.kde.org/stable/applications/${pkgver}/src/${_realname}-${pkgver}.tar.xz")
-sha256sums=('4afb79472935ed172e74a72e0008a0b9078523a07d831e16736638e7a4994dcb')
+source=(https://download.kde.org/stable/release-service/${pkgver}/src/${_realname}-${pkgver}.tar.xz{,.sig})
+sha256sums=('f60b52e5a6a78920ac703a458f1eaf0ced02ffcd8b5f2d49de9a48674eeb007c'
+            'SKIP')
 
 prepare() {
   mkdir -p build-${CARCH}${_variant}

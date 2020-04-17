@@ -1,6 +1,7 @@
---- qt-everywhere-src-5.12.1/qttools/src/qdoc/configure.pri.orig	2019-02-04 10:35:28.410184500 +0300
-+++ qt-everywhere-src-5.12.1/qttools/src/qdoc/configure.pri	2019-02-04 11:40:25.320737400 +0300
-@@ -92,16 +88,155 @@
+diff -Naur qt-everywhere-src-5.12.4-orig/qttools/src/qdoc/configure.pri qt-everywhere-src-5.12.4/qttools/src/qdoc/configure.pri
+--- qt-everywhere-src-5.12.4-orig/qttools/src/qdoc/configure.pri	2019-05-23 15:20:43.000000000 +0300
++++ qt-everywhere-src-5.12.4/qttools/src/qdoc/configure.pri	2019-06-15 16:06:23.285696500 +0300
+@@ -102,16 +102,163 @@
      }
  
      # note: llvm_config only exits on unix
@@ -31,6 +32,7 @@
 +                           -lLLVMAArch64Disassembler \
 +                           -lLLVMAArch64Info \
 +                           -lLLVMAArch64Utils \
++                           -lLLVMAggressiveInstCombine \
 +                           -lLLVMAMDGPUAsmParser \
 +                           -lLLVMAMDGPUAsmPrinter \
 +                           -lLLVMAMDGPUCodeGen \
@@ -113,6 +115,7 @@
 +                           -lLLVMObject \
 +                           -lLLVMObjectYAML \
 +                           -lLLVMOption \
++                           -lLLVMOptRemarks \
 +                           -lLLVMOrcJIT \
 +                           -lLLVMPasses \
 +                           -lLLVMPowerPCAsmParser \
@@ -143,6 +146,12 @@
 +                           -lLLVMTarget \
 +                           -lLLVMTransformUtils \
 +                           -lLLVMVectorize \
++                           -lLLVMWebAssemblyAsmParser \
++                           -lLLVMWebAssemblyAsmPrinter \
++                           -lLLVMWebAssemblyAsmCodegen \
++                           -lLLVMWebAssemblyAsmDesc \
++                           -lLLVMWebAssemblyAsmDisassembler \
++                           -lLLVMWebAssemblyAsmInfo \
 +                           -lLLVMWindowsManifest \
 +                           -lLLVMX86AsmParser \
 +                           -lLLVMX86AsmPrinter \
@@ -160,7 +169,7 @@
      }
      isEmpty(CLANG_VERSION) {
          !isEmpty(LLVM_INSTALL_DIR): \
-@@ -122,7 +253,7 @@
+@@ -132,7 +279,7 @@
  
      isEmpty(QDOC_USE_STATIC_LIBCLANG) {
          equals(QMAKE_HOST.os, Windows): \
@@ -169,25 +178,23 @@
          else: \
              CLANG_LIBS += -lclang
      } else {
-@@ -131,6 +262,8 @@
-             CLANG_LIBS += -llibclang_static -ladvapi32 -lshell32 -lMincore
-         } else {
-             !equals(QMAKE_HOST.os, Darwin): CLANG_LIBS+=-Wl,--start-group
-+            system(cd $${PWD}/../../src/qdoc; ar x $${CLANG_LIBDIR}/libclangEdit.a)
-+            CLANGEDIT_OBJS = $$system("ar t $${CLANG_LIBDIR}/libclangEdit.a")
-             CLANG_LIBS += -lclangAnalysis \
-                         -lclangApplyReplacements \
-                         -lclangARCMigrate \
-@@ -143,7 +276,7 @@
+@@ -151,6 +298,7 @@
+                         -lclangCodeGen \
+                         -lclangCrossTU \
                          -lclangDaemon \
++                        -lclangDoc \
                          -lclangDriver \
                          -lclangDynamicASTMatchers \
--                        -lclangEdit \
-+                        $${CLANGEDIT_OBJS} \
-                         -lclangFormat \
+                         -lclangEdit \
+@@ -158,6 +306,7 @@
                          -lclangFrontend \
                          -lclangFrontendTool \
-@@ -165,6 +298,7 @@
+                         -lclangHandleCXX \
++                        -lclangHandleLLVM \
+                         -lclangIncludeFixer \
+                         -lclangIncludeFixerPlugin \
+                         -lclangIndex \
+@@ -175,6 +324,7 @@
                          -lclangStaticAnalyzerCore \
                          -lclangStaticAnalyzerFrontend \
                          -lclangTidy \
@@ -195,7 +202,7 @@
                          -lclangTidyAndroidModule \
                          -lclangTidyBoostModule \
                          -lclangTidyBugproneModule \
-@@ -180,149 +314,20 @@
+@@ -190,149 +340,20 @@
                          -lclangTidyObjCModule \
                          -lclangTidyPerformanceModule \
                          -lclangTidyPlugin \

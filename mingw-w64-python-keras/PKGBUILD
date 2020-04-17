@@ -2,22 +2,32 @@
 
 _realname=keras
 pkgbase=mingw-w64-python-${_realname}
-pkgname=("${MINGW_PACKAGE_PREFIX}-python2-${_realname}" "${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
-pkgver=2.2.4
+pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
+provides=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+replaces=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+pkgver=2.3.1
 pkgrel=1
-pkgdesc="Keras is a high-level neural networks API, written in Python and capable of running on top of TensorFlow, CNTK, or Theano. (mingw-w64)"
+pkgdesc="Keras is a high-level neural networks API, written in Python and capable of running on top of TensorFlow, CNTK, or Theano (mingw-w64)"
 arch=('any')
-url="http://keras.io/"
+url="https://keras.io/"
 license=('MIT')
-_archive=${_realname}-${pkgver}
-source=(${_archive}.tar.gz::https://github.com/keras-team/keras/archive/${pkgver}.tar.gz
+depends=("${MINGW_PACKAGE_PREFIX}-python"
+         "${MINGW_PACKAGE_PREFIX}-python-numpy"
+         "${MINGW_PACKAGE_PREFIX}-python-scipy"
+         "${MINGW_PACKAGE_PREFIX}-python-six"
+         "${MINGW_PACKAGE_PREFIX}-python-yaml"
+         "${MINGW_PACKAGE_PREFIX}-python-h5py"
+         "${MINGW_PACKAGE_PREFIX}-python-keras_applications"
+         "${MINGW_PACKAGE_PREFIX}-python-keras_preprocessing"
+         "${MINGW_PACKAGE_PREFIX}-python-theano")
+makedepends=("patch"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools")
+source=(${_realname}-${pkgver}.tar.gz::https://github.com/keras-team/keras/archive/${pkgver}.tar.gz
         0001-change-backend-to-theano.patch)
-sha256sums=('46F8E5BD66F778ABD8D5A62B3C3D749FBD41854176FCF0DF5258CF94C3FD1B28'
-            '13CEDF9FD8636A3AC472671B8F07D118F6708BDD63CE3F3614923C18B35E3D7D')
+sha256sums=('7e8df9c5291f21a01bccffd8cbdd44abd7d2679ab2f7a892a503e88291627183'
+            '2e53d3c474d0d797ef7c6faf3ecdc77dfe123fa43bd19a151caaf894baadb47e')
 
-_deps=('numpy' 'scipy' 'six' 'yaml' 'h5py' 'keras_applications' 'keras_preprocessing' 'theano')
-makedepends=("${MINGW_PACKAGE_PREFIX}-python3-setuptools"
-             "${MINGW_PACKAGE_PREFIX}-python2-setuptools")
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
@@ -29,54 +39,26 @@ apply_patch_with_msg() {
 }
 
 prepare() {
-  cd "${srcdir}/${_archive}"
+  cd "${srcdir}/${_realname}-${pkgver}"
+
   apply_patch_with_msg \
     0001-change-backend-to-theano.patch
+
+  cd "${srcdir}"
+  rm -rf "python-build-${CARCH}" | true
+  cp -r "${_realname}-${pkgver}" "python-build-${CARCH}"
 }
 
 build() {
-  cd "${srcdir}"
-  rm -rf python{2,3}-build
-  for builddir in python{2,3}-build; do
-    cp -r ${_archive} ${builddir}
-    pushd $builddir
-    ${MINGW_PREFIX}/bin/${builddir%-build} setup.py build
-    popd
-  done
+  cd "${srcdir}/python-build-${CARCH}"
+  ${MINGW_PREFIX}/bin/python setup.py --quiet build
 }
 
-package_python3-keras() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python3" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}")
+package() {
+  cd "${srcdir}/python-build-${CARCH}"
 
-  cd "${srcdir}/python3-build"
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
-    ${MINGW_PREFIX}/bin/python3 setup.py install --prefix=${MINGW_PREFIX} --root="${pkgdir}" -O1
+    ${MINGW_PREFIX}/bin/python setup.py --quiet install --prefix=${MINGW_PREFIX} --root="${pkgdir}" -O1 --skip-build
 
-  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python3-${_realname}/LICENSE"
-}
-
-package_python2-keras() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python2" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}")
-
-  cd "${srcdir}/python2-build"
-  MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
-    ${MINGW_PREFIX}/bin/python2 setup.py install --prefix=${MINGW_PREFIX} --root="${pkgdir}" -O1
-
-  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python2-${_realname}/LICENSE"
-}
-
-package_mingw-w64-i686-python2-keras() {
-  package_python2-keras
-}
-
-package_mingw-w64-i686-python3-keras() {
-  package_python3-keras
-}
-
-package_mingw-w64-x86_64-python2-keras() {
-  package_python2-keras
-}
-
-package_mingw-w64-x86_64-python3-keras() {
-  package_python3-keras
+  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python-${_realname}/LICENSE"
 }

@@ -3,17 +3,18 @@
 _realname=proj
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=5.2.0
+pkgver=6.3.1
 pkgrel=1
 pkgdesc="Cartographic projection software (PROJ.4) (mingw-w64)"
 arch=(any)
 url="https://trac.osgeo.org/proj/"
 license=('MIT')
-depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs")
+depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs"
+         "${MINGW_PACKAGE_PREFIX}-sqlite3")
 makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-libtool")
 options=('staticlibs' 'strip')
-source=("http://download.osgeo.org/proj/${_realname}-${pkgver}.tar.gz")
-sha256sums=('ef919499ffbc62a4aae2659a55e2b25ff09cccbbe230656ba71c6224056c7e60')
+source=("https://download.osgeo.org/proj/${_realname}-${pkgver}.tar.gz")
+sha256sums=('6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8')
 
 prepare() {
   cd "${srcdir}/${_realname}-${pkgver}"

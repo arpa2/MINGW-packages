@@ -3,13 +3,14 @@
 _realname=leptonica
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=1.77.0
-pkgrel=1
+pkgver=1.79.0
+pkgrel=2
 pkgdesc="Leptonica library (mingw-w64)"
 arch=('any')
 url="http://www.leptonica.org"
 license=("Leptonica")
 makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-pkg-config")
+checkdepends=("${MINGW_PACKAGE_PREFIX}-gnuplot")
 depends=(${MINGW_PACKAGE_PREFIX}-gcc-libs
          ${MINGW_PACKAGE_PREFIX}-giflib
          ${MINGW_PACKAGE_PREFIX}-libtiff
@@ -19,7 +20,7 @@ depends=(${MINGW_PACKAGE_PREFIX}-gcc-libs
          ${MINGW_PACKAGE_PREFIX}-zlib)
 options=('!libtool' 'strip')
 source=(https://github.com/DanBloomberg/leptonica/releases/download/${pkgver}/${_realname}-${pkgver}.tar.gz)
-sha256sums=('161d0b368091986b6c60990edf257460bdc7da8dd18d48d4179e297bcdca5eb7')
+sha256sums=('045966c9c5d60ebded314a9931007a56d9d2f7a6ac39cb5cc077c816f62300d8')
 
 prepare() {
   cd "${srcdir}/${_realname}-${pkgver}"
@@ -27,8 +28,7 @@ prepare() {
 
 build() {
   [[ -d "${srcdir}/build-${CARCH}" ]] && rm -rf "${srcdir}/build-${CARCH}"
-  mkdir "${srcdir}/build-${CARCH}"
-  cd "${srcdir}/build-${CARCH}"
+  mkdir -p "${srcdir}/build-${CARCH}" && cd "${srcdir}/build-${CARCH}"
   CFLAGS+=" -DMINIMUM_SEVERITY=L_SEVERITY_WARNING"
   ../${_realname}-${pkgver}/configure \
     --disable-dependency-tracking \
@@ -40,12 +40,15 @@ build() {
   make
 }
 
-#check() {
-#  cd "${srcdir}/build-${CARCH}"
-#  make -j1 check
-#}
+check() {
+  cd "${srcdir}/build-${CARCH}"
+  make -j1 check
+}
 
 package() {
   cd "${srcdir}/build-${CARCH}"
   make DESTDIR="${pkgdir}" install
+
+  # Fix .pc file
+  sed -s "s|$(cygpath -m ${MINGW_PREFIX})|${MINGW_PREFIX}|g" -i "${pkgdir}${MINGW_PREFIX}"/lib/pkgconfig/lept.pc
 }

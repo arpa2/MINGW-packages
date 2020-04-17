@@ -3,22 +3,23 @@
 _realname=dbus
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=1.12.12
-pkgrel=1
+pkgver=1.12.16
+pkgrel=3
 arch=('any')
 pkgdesc="Freedesktop.org message bus system (mingw-w64)"
 depends=("${MINGW_PACKAGE_PREFIX}-glib2"
          "${MINGW_PACKAGE_PREFIX}-expat")
 makedepends=("${MINGW_PACKAGE_PREFIX}-gcc"
              "${MINGW_PACKAGE_PREFIX}-pkg-config"
-             "${MINGW_PACKAGE_PREFIX}-python2"
+             "${MINGW_PACKAGE_PREFIX}-python"
              "xmlto")
 options=('strip' 'staticlibs')
-license=("BSD")
+license=('GPL' 'custom')
 url="https://www.freedesktop.org/wiki/Software/dbus"
 source=("https://dbus.freedesktop.org/releases/dbus/${_realname}-${pkgver}.tar.gz"{,.asc})
-sha256sums=('9546f226011a1e5d9d77245fe5549ef25af4694053189d624d0d6ac127ecf5f8'
+sha256sums=('54a22d2fa42f2eb2a871f32811c6005b531b9613b1b93a0d269b05e7549fec80'
             'SKIP')
+validpgpkeys=('DA98F25C0871C49A59EAFF2C4DE8FF2A63C7CC90')
 
 prepare() {
   cd "${srcdir}"/${_realname}-${pkgver}
@@ -27,15 +28,16 @@ prepare() {
 }
 
 build() {
-  mkdir -p build-${MINGW_CHOST}
-  cd build-${MINGW_CHOST}
+  [[ -d "${srcdir}/build-${MINGW_CHOST}" ]] && rm -rf "${srcdir}/build-${MINGW_CHOST}"
+  mkdir -p "${srcdir}/build-${MINGW_CHOST}" && cd "${srcdir}/build-${MINGW_CHOST}"
 
   ../${_realname}-${pkgver}/configure \
     --host=${MINGW_CHOST} \
     --target=${MINGW_CHOST} \
     --build=${MINGW_CHOST} \
     --prefix=${MINGW_PREFIX} \
-    --enable-xml-docs \
+    --disable-xml-docs \
+    --disable-ducktype-docs \
     --disable-systemd \
     --enable-shared \
     --enable-static
@@ -44,7 +46,7 @@ build() {
 }
 
 check() {
-  cd build-${MINGW_CHOST}
+  cd "${srcdir}/build-${MINGW_CHOST}"
   make check || true
 }
 

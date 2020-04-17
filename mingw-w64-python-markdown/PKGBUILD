@@ -3,89 +3,57 @@
 _realname=markdown
 _pyname=Markdown
 pkgbase=mingw-w64-python-${_realname}
-pkgname=("${MINGW_PACKAGE_PREFIX}-python2-${_realname}" "${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
-pkgver=3.0.1
+pkgname=("${MINGW_PACKAGE_PREFIX}-python-${_realname}")
+provides=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+replaces=("${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+pkgver=3.1.1
 pkgrel=1
 pkgdesc="Python implementation of John Gruber's Markdown (mingw-w64)"
 url='https://pypi.python.org/pypi/Markdown'
 license=('BSD')
 arch=('any')
-makedepends=("${MINGW_PACKAGE_PREFIX}-python2-setuptools"
-             "${MINGW_PACKAGE_PREFIX}-python3-setuptools")
+depends=("${MINGW_PACKAGE_PREFIX}-python")
+makedepends=("${MINGW_PACKAGE_PREFIX}-python-pbr"
+             "${MINGW_PACKAGE_PREFIX}-python-setuptools")
+checkdepends=("${MINGW_PACKAGE_PREFIX}-python-yaml")
+install=python3-${_realname}-${CARCH}.install
 source=("https://pypi.io/packages/source/${_pyname:0:1}/${_pyname}/${_pyname}-${pkgver}.tar.gz")
-sha256sums=('d02e0f9b04c500cde6637c11ad7c72671f359b87b9fe924b2383649d8841db7c')
+sha256sums=('2e50876bcdd74517e7b71f3e7a76102050edec255b3983403f1a63e7c8a41e7a')
 
 prepare() {
   cd "${srcdir}"
-  for builddir in python{2,3}-build-${CARCH}; do
-    rm -rf ${builddir} | true
-    cp -r "${_realname}-${pkgver}" "${builddir}"
-  done
+
+  # bug in 2.4, some DOS line endings slipped in
+  find "${_realname}-${pkgver}" -name '*py' -exec sed -i 's|\r||g' {} +
+
+  # ImportError: No module named pkg_resources
+  sed -i 's/^from pkg_resources.*$/import packaging.version/' "${_realname}-${pkgver}/markdown/__init__.py"
+
+  cd "${srcdir}"
+  rm -rf "python-build-${CARCH}" | true
+  cp -r "${_realname}-${pkgver}" "python-build-${CARCH}"
 }
 
 build() {
-  for pver in {2,3}; do  
-    msg "Python ${pver} build for ${CARCH}"  
-    cd "${srcdir}/python${pver}-build-${CARCH}"
-    ${MINGW_PREFIX}/bin/python${pver} setup.py build
-  done 
+  cd "${srcdir}/python-build-${CARCH}"
+  ${MINGW_PREFIX}/bin/python setup.py build
 }
 
-package_python3-markdown() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python3")
+check() {
+  cd "${srcdir}/python-build-${CARCH}"
+  ${MINGW_PREFIX}/bin/python -m unittest discover tests
+}
 
-  cd ${srcdir}/python3-build-${CARCH}
-  ${MINGW_PREFIX}/bin/python3 setup.py build
+package() {
+  cd "${srcdir}/python-build-${CARCH}"
+
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
-  ${MINGW_PREFIX}/bin/python3 setup.py install --prefix=${MINGW_PREFIX} --root="${pkgdir}"
+  ${MINGW_PREFIX}/bin/python setup.py install --prefix=${MINGW_PREFIX} --root="${pkgdir}" --skip-build
 
   for _f in "${pkgdir}${MINGW_PREFIX}"/bin/*.py; do
     sed -e "s|$(cygpath -wm ${MINGW_PREFIX})|${MINGW_PREFIX}|g" -i "${_f}"
   done
 
-  install -D -m644 LICENSE.md "${pkgdir}${MINGW_PREFIX}"/share/licenses/python3-${_realname}/LICENSE.md
-}
-
-package_python2-markdown() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python2")
-
-  cd ${srcdir}/python2-build-${CARCH}
-  ${MINGW_PREFIX}/bin/python2 setup.py build
-  MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
-  ${MINGW_PREFIX}/bin/python2 setup.py install --prefix=${MINGW_PREFIX} --root="${pkgdir}"
-
-  for _f in "${pkgdir}${MINGW_PREFIX}"/bin/*.py; do
-    sed -e "s|$(cygpath -wm ${MINGW_PREFIX})|${MINGW_PREFIX}|g" -i "${_f}"
-  done
-
-  for f in markdown_py; do
-    mv "${pkgdir}${MINGW_PREFIX}"/bin/${f}{,2}.exe
-    if [ -f "${pkgdir}${MINGW_PREFIX}"/bin/${f}.exe.manifest ]; then
-      mv "${pkgdir}${MINGW_PREFIX}"/bin/${f}{,2}.exe.manifest
-      sed -e "s|${f}|${f}2|g" -i "${pkgdir}${MINGW_PREFIX}"/bin/${f}2.exe.manifest
-    fi
-    mv "${pkgdir}${MINGW_PREFIX}"/bin/${f}{,2}-script.py
-  done
-
-  install -D -m644 LICENSE.md "${pkgdir}${MINGW_PREFIX}"/share/licenses/python2-${_realname}/LICENSE.md
-}
-
-package_mingw-w64-i686-python2-markdown() {
-  install=python2-${_realname}-${CARCH}.install
-  package_python2-markdown
-}
-
-package_mingw-w64-i686-python3-markdown() {
-  install=python3-${_realname}-${CARCH}.install
-  package_python3-markdown
-}
-
-package_mingw-w64-x86_64-python2-markdown() {
-  install=python2-${_realname}-${CARCH}.install
-  package_python2-markdown
-}
-
-package_mingw-w64-x86_64-python3-markdown() {
-  install=python3-${_realname}-${CARCH}.install
-  package_python3-markdown
+  install -D -m644 LICENSE.md "${pkgdir}${MINGW_PREFIX}"/share/licenses/python-${_realname}/LICENSE.md
 }

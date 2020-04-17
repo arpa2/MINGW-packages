@@ -6,7 +6,7 @@
 _realname=gprbuild-bootstrap
 pkgbase=mingw-w64-${_realname}-git
 pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}-git
-pkgver=r3206.f95f0c68
+pkgver=r3576.43e55df6
 pkgrel=1
 pkgdesc="Static GPRbuild to bootstrap XML/Ada and GPRbuild itself (mingw-w64)"
 arch=('any')
@@ -21,8 +21,8 @@ conflicts=("${MINGW_PACKAGE_PREFIX}-gprbuild"
            "${MINGW_PACKAGE_PREFIX}-gprbuild-bootstrap")
 source=('git+https://github.com/AdaCore/gprbuild.git'
         'git+https://github.com/AdaCore/xmlada.git')
-sha1sums=('SKIP'
-          'SKIP')
+sha256sums=('SKIP'
+            'SKIP')
 
 pkgver() {
   cd "${srcdir}/gprbuild"

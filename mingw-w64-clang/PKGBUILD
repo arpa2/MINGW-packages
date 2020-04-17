@@ -4,6 +4,8 @@
 # Contributor: Mateusz Mikuła <mati865@gmail.com>
 # Contributor: wirx6 <wirx654@gmail.com>
 # Contributor: Yuui Tanabe <yuuitanabe@163.com>
+# Contributor: Oscar Fuentes <ofv@wanadoo.es>
+# Contributor: Adrian Pop <adrian.pop@liu.se>
 
 
 # We can switch to clang when it fully works with mingw-w64
@@ -27,8 +29,9 @@ pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}"
          "${MINGW_PACKAGE_PREFIX}-lld"
          "${MINGW_PACKAGE_PREFIX}-lldb"
          "${MINGW_PACKAGE_PREFIX}-llvm"
+         "${MINGW_PACKAGE_PREFIX}-openmp"
          "${MINGW_PACKAGE_PREFIX}-polly")
-pkgver=7.0.1
+pkgver=10.0.0
 pkgrel=1
 pkgdesc="C language family frontend for LLVM (mingw-w64)"
 arch=('any')
@@ -38,8 +41,8 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-cmake>=3.4.3"
              "${MINGW_PACKAGE_PREFIX}-z3"
              "${MINGW_PACKAGE_PREFIX}-libffi"
              "${MINGW_PACKAGE_PREFIX}-pkg-config"
-             "${MINGW_PACKAGE_PREFIX}-python3-sphinx"
-             "${MINGW_PACKAGE_PREFIX}-python2"
+             "${MINGW_PACKAGE_PREFIX}-python-sphinx"
+             "${MINGW_PACKAGE_PREFIX}-python"
              "${MINGW_PACKAGE_PREFIX}-swig"
              "tar"
              "groff"
@@ -48,45 +51,42 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-cmake>=3.4.3"
              $([[ "$_generator" == "Ninja" ]] && echo \
                "${MINGW_PACKAGE_PREFIX}-ninja")
              )
-depends=("${MINGW_PACKAGE_PREFIX}-gcc")
+depends=("${MINGW_PACKAGE_PREFIX}-gcc"
+         "${MINGW_PACKAGE_PREFIX}-uasm")
 options=('!debug' 'strip')
-source=(https://releases.llvm.org/${pkgver}/llvm-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/cfe-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/compiler-rt-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/test-suite-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/libcxx-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/libcxxabi-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/clang-tools-extra-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/lld-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/lldb-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/libunwind-${pkgver}.src.tar.xz{,.sig}
-        https://releases.llvm.org/${pkgver}/polly-${pkgver}.src.tar.xz{,.sig}
-        "0001-mingw-w64-use-MSVC-style-ByteAlignment.patch"
+#_url=https://releases.llvm.org
+_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver}
+source=(${_url}/llvm-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/openmp-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/clang-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/compiler-rt-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/test-suite-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/libcxx-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/libcxxabi-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/clang-tools-extra-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/lld-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/lldb-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/libunwind-${pkgver}.src.tar.xz{,.sig}
+        ${_url}/polly-${pkgver}.src.tar.xz{,.sig}
         "0002-Fix-GetHostTriple-for-mingw-w64-in-msys.patch"
-        "0003-Globally-provide-DESTDIR-for-all-platforms.patch"
         "0004-llvm-config-look-for-unversioned-shared-lib-on-win32.patch"
         "0005-add-pthread-as-system-lib-for-mingw.patch"
         "0006-add-coff-exported-flag.patch"
         "0007-getLoadAddressWithOffset-assertion.patch"
         "0009-empty-target-prefix-only-msvc.patch"
         "0010-mbig-obj-for-all.patch"
-        "0011-different-name-for-static-libraries.patch"
         "0012-fix-testplugin-linking.patch"
         "0101-Allow-build-static-clang-library-for-mingw.patch"
         "0102-fix-libclang-name-for-mingw.patch"
-        "0103-Set-the-x86-arch-name-to-i686-for-mingw-w64.patch"
         "0104-link-pthread-with-mingw.patch"
-        "0106-MinGW-use-flto-visibility-public-std-CC1-arg-to-get-.patch"
-        "0201-mingw-w64-__udivdi3-mangle-hack.patch"
-        "0401-mingw-w64-hack-and-slash-fixes-for-libc.patch"
-        "0405-fix-conflict-win32-posix-threads.patch"
-        "0501-fixes-to-get-lldb-building.patch"
+        "0105-build-libclang-cpp-fix.patch"
+        "0501-mingw-w64-provides-vasprintf.patch"
+        "0502-Add-missing-declarations-for-linking-to-psapi.patch"
         "0503-lldb-find-mingw-python.patch"
         "0504-fix-lldb-library-name-mingw.patch"
-        "0505-use-gnu-printf.patch"
-        "0506-mingw-python-posix-like.patch"
-        "0507-declare-exports-for-all-windows-platforms.patch"
-        "0801-Don-t-build-LLVMPolly-on-WIN32.patch")
+        "0801-Don-t-build-LLVMPolly-on-WIN32.patch"
+        "0901-openmp-kpm-lock.patch"
+        "0902-libomp-weak-mingw.patch")
 # Some patch notes :)
 #0001-0099 -> llvm
 #0101-0199 -> clang
@@ -97,65 +97,69 @@ source=(https://releases.llvm.org/${pkgver}/llvm-${pkgver}.src.tar.xz{,.sig}
 #0601-0699 -> libunwind
 #0701-0799 -> libc++abi
 #0801-0899 -> polly
-sha256sums=('a38dfc4db47102ec79dcc2aa61e93722c5f6f06f0a961073bd84b78fb949419b'
+#0901-0999 -> openmp
+sha256sums=('df83a44b3a9a71029049ec101fb0077ecbbdf5fe41e395215025779099a98fdf'
             'SKIP'
-            'a45b62dde5d7d5fdcdfa876b0af92f164d434b06e9e89b5d0b1cbc65dfe3f418'
+            '3b9ff29a45d0509a1e9667a0feb43538ef402ea8cfc7df3758a01f20df08adfa'
             'SKIP'
-            '782edfc119ee172f169c91dd79f2c964fb6b248bd9b73523149030ed505bbe18'
+            '885b062b00e903df72631c5f98b9579ed1ed2790f74e5646b4234fa084eacb21'
             'SKIP'
-            '199c6f5422779c002eda1112c7e813fedff4d54f94d994cebc8270e5b68aea4c'
+            '6a7da64d3a0a7320577b68b9ca4933bdcab676e898b759850e827333c3282c75'
             'SKIP'
-            '020002618b319dc2a8ba1f2cba88b8cc6a209005ed8ad29f9de0c562c6ebb9f1'
+            '2bcf0f76263572bf45bf7c552e3eae886ec2f315bbc529f3a68603bfc1d13b33'
             'SKIP'
-            '8168903a157ca7ab8423d3b974eaa497230b1564ceb57260be2bd14412e8ded8'
+            '270f8a3f176f1981b0f6ab8aa556720988872ec2b48ed3b605d0ced8d09156c7'
             'SKIP'
-            '4c93c7d2bb07923a8b272da3ef7914438080aeb693725f4fc5c19cd0e2613bed'
+            'e71bac75a88c9dde455ad3f2a2b449bf745eafd41d2d8432253b2964e0ca14e1'
             'SKIP'
-            '8869aab2dd2d8e00d69943352d3166d159d7eae2615f66a684f4a0999fc74031'
+            'acdf8cf6574b40e6b1dabc93e76debb84a9feb6f22970126b04d4ba18b92911c'
             'SKIP'
-            '76b46be75b412a3d22f0d26279306ae7e274fe4d7988a2184c529c38a6a76982'
+            'b9a0d7c576eeef05bc06d6e954938a01c5396cee1d1e985891e0b1cf16e3d708'
             'SKIP'
-            '89c852991dfd9279dbca9d5ac10b53c67ad7d0f54bbab7156e9f057a978b5912'
+            'dd1ffcb42ed033f5167089ec4c6ebe84fbca1db4a9eaebf5c614af09d89eb135'
             'SKIP'
-            '1bf146842a09336b9c88d2d76c2d117484e5fad78786821718653d1a9d57fb71'
+            '09dc5ecc4714809ecf62908ae8fe8635ab476880455287036a2730966833c626'
             'SKIP'
-            'd5b11097084f8a03dd3002c2adb27b4fec99cf290404049f1a4e1185274bde67'
-            '5081a1a9d8074b275f3087d4d80a13ce5d1c20bc1962819953790e54275930c8'
-            'c4e7e1945e60ce3fb4005069c499103432e4fb7c85625f33cbbba9eca9b261ef'
+            '35fba6ed628896fe529be4c10407f1b1c8a7264d40c76bced212180e701b4d97'
+            'SKIP'
+            '9b6d3ecb0ef4a38d34aefaefff8c6257ff22d366d84630020d7f079dc8065d97'
             '1f318c0370357fdf9c54ae6d31bad761b0caa58ac099998937b636309ecb6590'
             '7f0c64cd87b61e894be632f180ae5291e1aa9f1d9d382608f659067eeeda7146'
             '2c2431997e664c5b42b359f4134a4773578753e5e25c505ba30de42d357f3057'
             '1887ea21fcd591a50dd10559774e872ce1183177e672b028133d9b669e3cac32'
             '33400d16d5f6671a8fd60345c3ae44b9777a7d600061957889d14305eb2ad709'
             '1c9efccd40a0e7834c3aa9d819aa25cfdd2cec389d1bd3e8a89bc9ff670a0129'
-            '18e719f49af8704c66d7d5e0c0c94ab04a7206fe2a3d711eb652e0afb35ff52c'
-            'cc6e0c2a507578f91e3caf8be2629fd4f330a785741245dde8fcb0efaffeb151'
-            'f2b0403e6b6cafddf364a90a6bb1e57793fd98d6f80f8976a87574cd93eb1d1a'
-            'b1ed2ccdb87bb4f024a5cd750e71de3706fd24ccfeb87835403dab84ef7a9019'
-            'ab49b90d69a609f441fa58e835873f2b1a8a060c9ca6358fee7d99c1973da692'
+            'c486e1d45f6fb2a24823d776d2b47d6930530d423df73cc635f863265210c294'
+            'b2e5fd29bf666998d495a321690c97fe239bb998abcf0739418ac0ea725fecd6'
+            '01b029f2a21bd998ce374a90d41d214c891dfbb611dfbd9ca147517cd2c228ea'
             '53646dd01af2862473e9719c5223366486268891ccbff86413943a432a8342e9'
-            '3d6045cf35d5523c68baf87bd490007d4ac8fe3eabcbc23d8c66e80ff1c234e7'
-            'bafaf7d06bec3ed7fba58e8a926e7b472b5e16442b6ee9dd8c7ee6c0cce9792a'
-            'da44cca549bc7fb9e04f0f038a1ed68ba99cdfec834fc241ab13880bd0aa3b0f'
-            '2f8f3c819837e4a16a364ed6e2a0a879cd10f924169ed7d89c27c1ed64edfe95'
-            '4d84985dc1fd8cccb6ad6d4629cddff310ac14defbea9a6df97cb55fd0ac34a0'
-            'bb78e162cccd926feadecd89e6352e12b40f3d3ccc6b444e4e39383cc44286c2'
-            '769a8286ff528178256cc6001bb21562857ba9e9ab2214e5709b030d1b684ace'
-            'b06014b98f96249386a75f3282c863a932efab5519a81dd68d28f8565ee91589'
-            'dc758dfd564db316c717fe1ab201a432a47b2327ecf8835d28b1e2daad5962a6'
-            '78d52a2e11b3e6d0acbaab8b603921674dfed70062bf3aaf37ce1961de68d416'
-            'bc394e597f8939b6f6630bd88c990f951738aaadacded2f3be71c658e9608fe7')
+            'a60f7328d84628a56a9f626e4dc26ffd0c35292c79eeba62ac3d4f25aef2fe5c'
+            'bb3ab0d55c63b406dfa850c1a882425e76ebe5e2551d7d80ebb0ca2dcb68dab3'
+            '6ee9d0bd6abe0a3642bb3078fc285b56f945ba6443a9d305d3f54f1c63f0672a'
+            'd1021748be52cfd447cbfff5f1bfcbb540f7d9e80af7c1bb3f2cc4c0c3a79eab'
+            'bed7ae642486a8fd0db5afb0b9afcd8a87605de318ad891bf4c9378a2eb09dc2'
+            'bc394e597f8939b6f6630bd88c990f951738aaadacded2f3be71c658e9608fe7'
+            'db8dc554f7780609ee4eb4bc9e3817d4a9409b622f6471c8db06c92705805ead'
+            'f7958638e73273ea6a8df4a4e8726a0904d049fdaea7e84c33db5dec1af08fa8')
 validpgpkeys=('B6C8F98282B944E3B0D5C2530FC3042E345AD05D'  # Hans Wennborg, Google.
               '474E22316ABF4785A88C6E8EA2C794A986419D8A') # Tom Stellard
-noextract=(cfe-${pkgver}.src.tar.xz
+noextract=(clang-${pkgver}.src.tar.xz
            libcxx-${pkgver}.src.tar.xz
            lldb-${pkgver}.src.tar.xz
            test-suite-${pkgver}.src.tar.xz)
 
+apply_patch_with_msg() {
+  for _patch in "$@"
+  do
+    msg2 "Applying ${_patch}"
+    patch -Nbp1 -i "${srcdir}/${_patch}"
+  done
+}
+
 prepare() {
   plain "Extracting clang-${pkgver}.src.tar.xz due to symlink(s) without pre-existing target(s)"
-  [[ -d ${srcdir}/cfe-${pkgver} ]] && rm -rf ${srcdir}/cfe-${pkgver}
-  [[ -d ${srcdir}/cfe-${pkgver} ]] || tar -xJvf ${srcdir}/cfe-${pkgver}.src.tar.xz -C ${srcdir} || true
+  [[ -d ${srcdir}/clang-${pkgver} ]] && rm -rf ${srcdir}/clang-${pkgver}
+  [[ -d ${srcdir}/clang-${pkgver} ]] || tar -xJvf ${srcdir}/clang-${pkgver}.src.tar.xz -C ${srcdir} || true
 
   plain "Extracting libcxx-${pkgver}.src.tar.xz due to symlink(s) without pre-existing target(s)"
   [[ -d ${srcdir}/libcxx-${pkgver} ]] && rm -rf ${srcdir}/libcxx-${pkgver}
@@ -166,59 +170,52 @@ prepare() {
   [[ -d ${srcdir}/lldb-${pkgver} ]] || tar -xJvf ${srcdir}/lldb-${pkgver}.src.tar.xz -C ${srcdir} || true
 
   cd "${srcdir}/llvm-${pkgver}.src"
-  patch -p1 -i "${srcdir}/0001-mingw-w64-use-MSVC-style-ByteAlignment.patch"
-  patch -p1 -i "${srcdir}/0002-Fix-GetHostTriple-for-mingw-w64-in-msys.patch"
-  patch -p1 -i "${srcdir}/0003-Globally-provide-DESTDIR-for-all-platforms.patch"
-  patch -p1 -i "${srcdir}/0004-llvm-config-look-for-unversioned-shared-lib-on-win32.patch"
-  patch -p1 -i "${srcdir}/0005-add-pthread-as-system-lib-for-mingw.patch"
-  patch -p1 -i "${srcdir}/0009-empty-target-prefix-only-msvc.patch"
-  patch -p1 -i "${srcdir}/0010-mbig-obj-for-all.patch"
-  patch -p1 -i "${srcdir}/0012-fix-testplugin-linking.patch"
+  apply_patch_with_msg \
+      "0002-Fix-GetHostTriple-for-mingw-w64-in-msys.patch" \
+      "0004-llvm-config-look-for-unversioned-shared-lib-on-win32.patch" \
+      "0005-add-pthread-as-system-lib-for-mingw.patch" \
+      "0009-empty-target-prefix-only-msvc.patch" \
+      "0010-mbig-obj-for-all.patch" \
+      "0012-fix-testplugin-linking.patch"
 
   # https://bugs.llvm.org/show_bug.cgi?id=25493
-  patch -p1 -i "${srcdir}/0006-add-coff-exported-flag.patch"
+  apply_patch_with_msg \
+      "0006-add-coff-exported-flag.patch"
   # https://bugs.llvm.org/show_bug.cgi?id=30584
-  patch -p1 -i "${srcdir}/0007-getLoadAddressWithOffset-assertion.patch"
+  apply_patch_with_msg \
+      "0007-getLoadAddressWithOffset-assertion.patch"
 
-  cd "${srcdir}/cfe-${pkgver}.src"
-  patch -p1 -i "${srcdir}/0101-Allow-build-static-clang-library-for-mingw.patch"
-  patch -p1 -i "${srcdir}/0102-fix-libclang-name-for-mingw.patch"
-  patch -p1 -i "${srcdir}/0103-Set-the-x86-arch-name-to-i686-for-mingw-w64.patch"
-  patch -p1 -i "${srcdir}/0104-link-pthread-with-mingw.patch"
-  patch -p1 -i "${srcdir}/0106-MinGW-use-flto-visibility-public-std-CC1-arg-to-get-.patch"
-
-  cd "${srcdir}/compiler-rt-${pkgver}.src"
-  patch -p1 -i "${srcdir}/0201-mingw-w64-__udivdi3-mangle-hack.patch"
-
-  #cd "${srcdir}/lld-${pkgver}.src"
-
-  cd "${srcdir}/libcxx-${pkgver}.src"
-  patch -p1 -i "${srcdir}/0401-mingw-w64-hack-and-slash-fixes-for-libc.patch"
-  patch -p1 -i "${srcdir}/0405-fix-conflict-win32-posix-threads.patch"
+  cd "${srcdir}/clang-${pkgver}.src"
+  apply_patch_with_msg \
+      "0101-Allow-build-static-clang-library-for-mingw.patch" \
+      "0102-fix-libclang-name-for-mingw.patch" \
+      "0104-link-pthread-with-mingw.patch" \
+      "0105-build-libclang-cpp-fix.patch"
 
   cd "${srcdir}/lldb-${pkgver}.src"
-  patch -p1 -i "${srcdir}/0501-fixes-to-get-lldb-building.patch"
-  patch -p1 -i "${srcdir}/0503-lldb-find-mingw-python.patch"
-  patch -p1 -i "${srcdir}/0504-fix-lldb-library-name-mingw.patch"
-  patch -p1 -i "${srcdir}/0505-use-gnu-printf.patch"
-  patch -p1 -i "${srcdir}/0506-mingw-python-posix-like.patch"
-  patch -p1 -i "${srcdir}/0507-declare-exports-for-all-windows-platforms.patch"
-
-  #cd "${srcdir}/libunwind-${pkgver}.src"
-
-  #cd "${srcdir}/libcxxabi-${pkgver}.src"
+  apply_patch_with_msg \
+      "0501-mingw-w64-provides-vasprintf.patch" \
+      "0502-Add-missing-declarations-for-linking-to-psapi.patch" \
+      "0503-lldb-find-mingw-python.patch" \
+      "0504-fix-lldb-library-name-mingw.patch" \
 
   cd "${srcdir}/polly-${pkgver}.src"
   # With LLVM_LINK_LLVM_DYLIB=ON it's build before LLVM and fails with undefined references to LLVM functions
-  patch -p1 -i "${srcdir}/0801-Don-t-build-LLVMPolly-on-WIN32.patch"
+  apply_patch_with_msg \
+      "0801-Don-t-build-LLVMPolly-on-WIN32.patch"
+
+  cd "${srcdir}/openmp-${pkgver}.src"
+  apply_patch_with_msg \
+      "0901-openmp-kpm-lock.patch" \
+      "0902-libomp-weak-mingw.patch"
 
   # At the present, clang must reside inside the LLVM source code tree to build
   # See https://bugs.llvm.org/show_bug.cgi?id=4840
 
   cd "${srcdir}"/llvm-${pkgver}.src
   rm -rf tools/clang tools/clang/tools/extra tools/lld tools/lldb tools/polly projects/compiler-rt projects/libcxx \
-         projects/libcxxabi projects/libunwind projects/test-suite | true
-  mv "${srcdir}/cfe-${pkgver}.src"               tools/clang
+         projects/libcxxabi projects/libunwind projects/openmp projects/test-suite | true
+  mv "${srcdir}/clang-${pkgver}.src"               tools/clang
   mv "${srcdir}/clang-tools-extra-${pkgver}.src" tools/clang/tools/extra
   mv "${srcdir}/lld-${pkgver}.src"               tools/lld
   mv "${srcdir}/lldb-${pkgver}.src"              tools/lldb
@@ -227,6 +224,7 @@ prepare() {
   mv "${srcdir}/libcxxabi-${pkgver}.src"         projects/libcxxabi
   mv "${srcdir}/libcxx-${pkgver}.src"            projects/libcxx
   mv "${srcdir}/libunwind-${pkgver}.src"         projects/libunwind
+  mv "${srcdir}/openmp-${pkgver}.src"            projects/openmp
   #mv "${srcdir}/testsuite-${pkgver}.src"         projects/test-suite
 }
 
@@ -258,36 +256,51 @@ build() {
     export CC='clang'
     export CXX='clang++'
   fi
+  
+  export ASM_COMPILER="${MINGW_PREFIX}/bin/uasm.exe"
+  if [ "${CARCH}" == "x86_64" ]; then
+    export ASM_COMPILER_FLAGS=-win64
+  fi
 
   MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
   ${MINGW_PREFIX}/bin/cmake.exe \
     -G"$_generator" \
+    -DCLANG_ANALYZER_BUILD_Z3=ON \
+    -DCMAKE_ASM_MASM_COMPILER="${ASM_COMPILER}" \
+    -DCMAKE_C_FLAGS="${CFLAGS}" \
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS} -D_GNU_SOURCE -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS" \
+    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
     -DCMAKE_SYSTEM_IGNORE_PATH=/usr/lib \
     -DFFI_INCLUDE_DIR="${FFI_INCLUDE_DIR}" \
-    -DCMAKE_C_FLAGS="${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS} -D_GNU_SOURCE" \
-    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-    -DCLANG_ANALYZER_BUILD_Z3=ON \
     -DLIBCLANG_BUILD_STATIC=ON \
-    -DLIBCXX_ENABLE_SHARED=OFF \
+    -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
     -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
+    -DLIBCXX_ENABLE_SHARED=OFF \
+    -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
     -DLIBCXX_HAS_WIN32_THREAD_API=ON \
     -DLIBCXXABI_ENABLE_SHARED=OFF \
-    -DLIBUNWIND_ENABLE_SHARED=OFF \
-    -DLLVM_BUILD_STATIC=OFF \
-    -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_ENABLE_ASSERTIONS=OFF \
-    -DLLVM_ENABLE_FFI=ON \
-    -DLLVM_ENABLE_THREADS=ON \
-    -DLLVM_ENABLE_SPHINX=ON \
-    -DLLVM_LINK_LLVM_DYLIB=OFF \
-    -DLLVM_POLLY_LINK_INTO_TOOLS=OFF \
+    -DLIBOMP_ASMFLAGS="${ASM_COMPILER_FLAGS}" \
+    -DLIBOMP_FORTRAN_MODULES=ON \
+    -DLIBUNWIND_ENABLE_SHARED=ON \
+    -DLLDB_ENABLE_LIBEDIT=OFF \
     -DLLDB_RELOCATABLE_PYTHON=ON \
     -DLLDB_USE_SYSTEM_SIX=ON \
-    -DLLDB_DISABLE_PYTHON=ON \
-    -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/python2.exe \
+    -DLLVM_BUILD_LLVM_DYLIB=ON \
+    -DLLVM_BUILD_STATIC=OFF \
+    -DLLVM_ENABLE_ASSERTIONS=OFF \
+    -DLLVM_ENABLE_FFI=ON \
+    -DLLVM_ENABLE_SPHINX=ON \
+    -DLLVM_ENABLE_THREADS=ON \
+    -DLLVM_INCLUDE_EXAMPLES=OFF \
+    -DLLVM_LINK_LLVM_DYLIB=OFF \
+    -DLLVM_POLLY_LINK_INTO_TOOLS=OFF \
+    -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/python.exe \
     "${extra_config[@]}" \
     ../llvm-${pkgver}.src
+
+  # sed away the bad windows style command line parameters (they are translated by msys from /bad to c:\msys\bad
+  sed -i.orig 's/\/c  \/Fo/-c -Fo/' projects/openmp/runtime/src/CMakeFiles/omp.dir/build.make
+  sed -i.orig 's/\/safeseh \/coff/-safeseh -coff/' projects/openmp/runtime/src/CMakeFiles/omp.dir/build.make
 
   ${_make_cmd}
 
@@ -297,7 +310,8 @@ build() {
   sed -i.orig '/\(clang\|lld\|lldb\|polly\)\/cmake_install.cmake/d' tools/cmake_install.cmake
   sed -i.orig '/\(extra\|scan-build\|scan-view\)\/cmake_install.cmake/d' tools/clang/tools/cmake_install.cmake
 # sed -i.orig '/\(compiler-rt\|libcxxabi\|libcxx\)\/cmake_install.cmake/d' projects/cmake_install.cmake
-  sed -i.orig '/\(compiler-rt\|libcxxabi\|libcxx\|libunwind\)\/cmake_install.cmake/d' projects/cmake_install.cmake
+  sed -i.orig '/\(compiler-rt\|libcxxabi\|libcxx\|openmp\|libunwind\)\/cmake_install.cmake/d' projects/cmake_install.cmake
+  # fix the bad command line parameters, use unix style
 }
 
 #check() {
@@ -327,7 +341,7 @@ package_clang-analyzer() {
   pkgdesc="A source code analysis framework (mingw-w64)"
   url="https://clang-analyzer.llvm.org/"
   depends=("${MINGW_PACKAGE_PREFIX}-clang=${pkgver}-${pkgrel}"
-           "${MINGW_PACKAGE_PREFIX}-python2")
+           "${MINGW_PACKAGE_PREFIX}-python")
 
   cd "${srcdir}/llvm-${pkgver}.src"
   ${_make_cmd} -C ../build-${CARCH}/tools/clang/tools/scan-build -j1 DESTDIR="${pkgdir}" install
@@ -340,8 +354,8 @@ package_clang-analyzer() {
     "${pkgdir}"${MINGW_PREFIX}/bin/scan-view
 
   # Compile Python scripts
-  python2 -m compileall "${pkgdir}"${MINGW_PREFIX}/bin/clang-analyzer
-  python2 -O -m compileall "${pkgdir}"${MINGW_PREFIX}/lib/clang-analyzer
+  ${MINGW_PREFIX}/bin/python -m compileall "${pkgdir}"${MINGW_PREFIX}/bin/clang-analyzer
+  ${MINGW_PREFIX}/bin/python -O -m compileall "${pkgdir}"${MINGW_PREFIX}/lib/clang-analyzer
   install -Dm644 LICENSE.TXT "${pkgdir}"${MINGW_PREFIX}/share/licenses/clang-analyzer/LICENSE
 }
 
@@ -370,6 +384,14 @@ package_libcxx() {
   ${_make_cmd} -C ../build-${CARCH}/projects/libcxx -j1 DESTDIR="${pkgdir}" install
 }
 
+package_openmp() {
+  pkgdesc="OpenMP library (mingw-w64)"
+  url="https://openmp.llvm.org/"
+
+  cd "${srcdir}/llvm-${pkgver}.src"
+  ${_make_cmd} -C ../build-${CARCH}/projects/openmp DESTDIR="${pkgdir}" install
+}
+
 package_libcxxabi() {
   pkgdesc="C++ Standard Library Support (mingw-w64)"
   url="https://libcxxabi.llvm.org/"
@@ -386,6 +408,9 @@ package_libunwind() {
 
   cd "${srcdir}/llvm-${pkgver}.src"
   ${_make_cmd} -C ../build-${CARCH}/projects/libunwind -j1 DESTDIR="${pkgdir}" install
+
+  mkdir -p "${pkgdir}${MINGW_PREFIX}/bin"
+  install "${srcdir}/build-${CARCH}/lib/libunwind.dll" "${pkgdir}${MINGW_PREFIX}/bin/libunwind.dll"
 }
 
 package_lld() {
@@ -401,7 +426,7 @@ package_lldb() {
   url="https://lldb.llvm.org/"
   depends=("${MINGW_PACKAGE_PREFIX}-libxml2"
            "${MINGW_PACKAGE_PREFIX}-llvm"
-           "${MINGW_PACKAGE_PREFIX}-python2"
+           "${MINGW_PACKAGE_PREFIX}-python"
            "${MINGW_PACKAGE_PREFIX}-readline"
            "${MINGW_PACKAGE_PREFIX}-swig")
 
@@ -410,8 +435,9 @@ package_lldb() {
   ${_make_cmd} -C ../build-${CARCH}/tools/lldb DESTDIR="${pkgdir}" install
 
   # Compile Python scripts
-  python2 -m compileall "${pkgdir}${MINGW_PREFIX}/lib/python2.7/site-packages/lldb"
-  python2 -O -m compileall "${pkgdir}${MINGW_PREFIX}/lib/python2.7/site-packages/lldb"
+   local _pyver=$(${MINGW_PREFIX}/bin/python -c "import sys;sys.stdout.write('.'.join(map(str, sys.version_info[:2])))")
+  ${MINGW_PREFIX}/bin/python -m compileall "${pkgdir}${MINGW_PREFIX}/lib/python${_pyver}/site-packages/lldb"
+  ${MINGW_PREFIX}/bin/python -O -m compileall "${pkgdir}${MINGW_PREFIX}/lib/python${_pyver}/site-packages/lldb"
 
   install -Dm644 tools/lldb/LICENSE.TXT "${pkgdir}${MINGW_PREFIX}/share/licenses/lldb/LICENSE"
 }
@@ -419,6 +445,7 @@ package_lldb() {
 package_llvm() {
   pkgdesc="Low Level Virtual Machine (mingw-w64)"
   depends=("${MINGW_PACKAGE_PREFIX}-libffi"
+           "${MINGW_PACKAGE_PREFIX}-z3"
            "${MINGW_PACKAGE_PREFIX}-gcc-libs") # "compiler-rt"
 
   cd "${srcdir}"/llvm-${pkgver}.src
@@ -426,7 +453,7 @@ package_llvm() {
   ${_make_cmd} -C ../build-${CARCH} DESTDIR="${pkgdir}" install
 
   # TODO: why CMake haven't included it?
-  #cp ../build-${CARCH}/lib/libLLVM.dll.a "${pkgdir}/${MINGW_PREFIX}/lib/"
+  cp ../build-${CARCH}/lib/libLLVM.dll.a "${pkgdir}/${MINGW_PREFIX}/lib/"
 
   install -Dm644 LICENSE.TXT "${pkgdir}${MINGW_PREFIX}/share/licenses/llvm/LICENSE"
 
@@ -451,7 +478,10 @@ package_polly() {
   ${_make_cmd} -C ../build-${CARCH}/tools/polly DESTDIR="${pkgdir}" install
   # fox cmake files.
   local PREFIX_WIN=$(cygpath -wm ${MINGW_PREFIX})
-  sed -e "s|${PREFIX_WIN}/bin/|${MINGW_PREFIX}/|g" -i "${pkgdir}/${MINGW_PREFIX}/lib/cmake/polly/PollyConfig.cmake"
+  local SRC_WIN=$(cygpath -wm ${srcdir})
+  sed -e "s|${PREFIX_WIN}|${MINGW_PREFIX}/|g" \
+    -e "s|${SRC_WIN}/build-${CARCH}/lib|${MINGW_PREFIX}/lib|g" \
+    -i "${pkgdir}/${MINGW_PREFIX}/lib/cmake/polly/PollyConfig.cmake"
 }
 
 # Wrappers
@@ -477,6 +507,10 @@ package_mingw-w64-i686-libc++abi(){
 
 package_mingw-w64-i686-libc++(){
   package_libcxx
+}
+
+package_mingw-w64-i686-openmp(){
+  package_openmp
 }
 
 package_mingw-w64-i686-lld(){
@@ -522,6 +556,11 @@ package_mingw-w64-x86_64-libc++abi(){
 package_mingw-w64-x86_64-libc++(){
   package_libcxx
 }
+
+package_mingw-w64-x86_64-openmp(){
+  package_openmp
+}
+
 
 package_mingw-w64-x86_64-lld(){
   package_lld

@@ -3,7 +3,7 @@
 _realname=pegtl
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=2.7.1
+pkgver=2.8.1
 pkgrel=1
 pkgdesc="Parsing Expression Grammar (PEG) Template Library (mingw-w64)"
 arch=('any')
@@ -12,10 +12,8 @@ license=('MIT')
 depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake")
 options=('strip' 'staticlibs')
-source=("${_realname}-${pkgver}.tar.gz"::"https://github.com/taocpp/PEGTL/archive/${pkgver}.tar.gz"
-        001-gcc8-error.patch)
-sha256sums=('af68ee953d4efc48e090722f8cb9ad4ef1140f6a5443581563e003e060376718'
-            'dd1179636b78b7cad89404b74719937701d1d2baa5a446374a000518bf8adbf9')
+source=("${_realname}-${pkgver}.tar.gz"::"https://github.com/taocpp/PEGTL/archive/${pkgver}.tar.gz")
+sha256sums=('d23f81a60896cdd8c2ce0d1b31737fe0e1137915ba3fdb4f366ae1a997a1bce6')
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
@@ -36,11 +34,6 @@ del_file_exists() {
 }
 # =========================================== #
 
-prepare() {
-  cd "${srcdir}"/${_realname}-${pkgver}
-  patch -p1 -i ${srcdir}/001-gcc8-error.patch
-}
-
 build() {
   cd "${srcdir}"/${_realname}-${pkgver}
   [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
@@ -59,6 +52,8 @@ build() {
       -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
       "${extra_config[@]}" \
       -DBUILD_{SHARED,STATIC}_LIBS=ON \
+      -DPEGTL_INSTALL_DOC_DIR=share/doc/${_realname} \
+      -DPEGTL_INSTALL_CMAKE_DIR=lib/cmake/${_realname} \
       ../${_realname}-${pkgver}
 
   make

@@ -3,7 +3,7 @@
 _realname=binaryen
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=68
+pkgver=91
 pkgrel=1
 pkgdesc="Compiler infrastructure and toolchain library for WebAssembly, in C++ (mingw-w64)"
 arch=('any')
@@ -12,8 +12,8 @@ license=('Apache')
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake")
 source=("${_realname}-${pkgver}.tar.gz::https://github.com/WebAssembly/binaryen/archive/version_${pkgver}.tar.gz"
         001-install-fix.patch)
-sha256sums=('5efc90705246c7684672b24d54ae177a661b64650877649dbf5afa3eea34d729'
-            '7b73855ff4323d3c3cbea6f70e7a1d33f68502394c625d92e421dc80d15ef774')
+sha256sums=('522a30c0fd29f55d44dbc299aa768eccbda67ef134c8563085f874daa5622d7a'
+            '2f38e82edbeebe9ad6e3ec289f9c5b7f3f8435eafaf0e49523c01bd9895779db')
 
 prepare() {
   cd "${srcdir}/${_realname}-version_${pkgver}"
@@ -21,6 +21,13 @@ prepare() {
 }
 
 build() {
+  declare -a extra_config
+  if check_option "debug" "n"; then
+    extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+  else
+    extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+  fi
+
   rm -rf "${srcdir}/build-${MINGW_CHOST}"
   mkdir "${srcdir}/build-${MINGW_CHOST}"
   cd "${srcdir}/build-${MINGW_CHOST}"
@@ -29,6 +36,7 @@ build() {
   ${MINGW_PREFIX}/bin/cmake.exe \
     -G"MSYS Makefiles" \
     -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    ${extra_config} \
     "../${_realname}-version_${pkgver}"
 
   make
@@ -37,4 +45,5 @@ build() {
 package() {
   cd "${srcdir}/build-${MINGW_CHOST}"
   make DESTDIR="${pkgdir}" install
+  install -Dm644 ${srcdir}/${_realname}-version_${pkgver}/LICENSE ${okgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE
 }

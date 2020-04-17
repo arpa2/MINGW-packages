@@ -4,7 +4,7 @@
 _realname=x265
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=3.0
+pkgver=3.3
 pkgrel=1
 pkgdesc='Open Source H265/HEVC video encoder (mingw-w64)'
 arch=('any')
@@ -13,15 +13,12 @@ depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs")
 makedepends=("${MINGW_PACKAGE_PREFIX}-nasm" "${MINGW_PACKAGE_PREFIX}-cmake")
 options=('strip')
 url='https://bitbucket.org/multicoreware/x265'
-source=("${_realname}-${pkgver}.tar.gz"::"https://bitbucket.org/multicoreware/x265/downloads/${_realname}_${pkgver}.tar.gz"
-        "0001-winxp-condition-var.mingw.patch")
-sha256sums=('c5b9fc260cabbc4a81561a448f4ce9cad7218272b4011feabc3a6b751b2f0662'
-            'c71016ca51eb6d8916de9ef48f14048412569ae89e149f3d372158af6378e0e4')
+source=("${_realname}-${pkgver}.tar.gz"::"https://bitbucket.org/multicoreware/x265/downloads/${_realname}_${pkgver}.tar.gz")
+sha256sums=('f26e148ed1f4dfb33fd1eb3ff5e60e08078d1b2017e88bcbb045b3fb58300b9c')
 
 
 prepare() {
   cd "${srcdir}"/x265_${pkgver}
-  patch -Np1 -i ${srcdir}/0001-winxp-condition-var.mingw.patch
   
   for d in 8 10 12; do
     if [[ -d ${srcdir}/build-${CARCH}-${d} ]]; then
